@@ -1,189 +1,168 @@
-var board;
-var score = 0;
-var rows = 4;
-var columns = 4;
-
-window.onload = function() {
-    setGame();
-}
-
-function setGame() {
-    // board = [
-    //     [2, 2, 2, 2],
-    //     [2, 2, 2, 2],
-    //     [4, 4, 8, 8],
-    //     [4, 4, 8, 8]
-    // ];
-
-    board = [
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0],
-        [0, 0, 0, 0]
-    ]
-
-    for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < columns; c++) {
-            let tile = document.createElement("div");
-            tile.id = r.toString() + "-" + c.toString();
-            let num = board[r][c];
-            updateTile(tile, num);
-            document.getElementById("board").append(tile);
-        }
-    }
-    //create 2 to begin the game
-    setTwo();
-    setTwo();
-
-}
-
-function updateTile(tile, num) {
-    tile.innerText = "";
-    tile.classList.value = ""; //clear the classList
-    tile.classList.add("tile");
-    if (num > 0) {
-        tile.innerText = num.toString();
-        if (num <= 4096) {
-            tile.classList.add("x"+num.toString());
-        } else {
-            tile.classList.add("x8192");
-        }                
-    }
-}
-
-document.addEventListener('keyup', (e) => {
-    if (e.code == "ArrowLeft") {
-        slideLeft();
-        setTwo();
-    }
-    else if (e.code == "ArrowRight") {
-        slideRight();
-        setTwo();
-    }
-    else if (e.code == "ArrowUp") {
-        slideUp();
-        setTwo();
-
-    }
-    else if (e.code == "ArrowDown") {
-        slideDown();
-        setTwo();
-    }
-    document.getElementById("score").innerText = score;
-})
-
-function filterZero(row){
-    return row.filter(num => num != 0); //create new array of all nums != 0
-}
-
-function slide(row) {
-    //[0, 2, 2, 2] 
-    row = filterZero(row); //[2, 2, 2]
-    for (let i = 0; i < row.length-1; i++){
-        if (row[i] == row[i+1]) {
-            row[i] *= 2;
-            row[i+1] = 0;
-            score += row[i];
-        }
-    } //[4, 0, 2]
-    row = filterZero(row); //[4, 2]
-    //add zeroes
-    while (row.length < columns) {
-        row.push(0);
-    } //[4, 2, 0, 0]
-    return row;
-}
-
-function slideLeft() {
-    for (let r = 0; r < rows; r++) {
-        let row = board[r];
-        row = slide(row);
-        board[r] = row;
-        for (let c = 0; c < columns; c++){
-            let tile = document.getElementById(r.toString() + "-" + c.toString());
-            let num = board[r][c];
-            updateTile(tile, num);
-        }
-    }
-}
-
-function slideRight() {
-    for (let r = 0; r < rows; r++) {
-        let row = board[r];         //[0, 2, 2, 2]
-        row.reverse();              //[2, 2, 2, 0]
-        row = slide(row)            //[4, 2, 0, 0]
-        board[r] = row.reverse();   //[0, 0, 2, 4];
-        for (let c = 0; c < columns; c++){
-            let tile = document.getElementById(r.toString() + "-" + c.toString());
-            let num = board[r][c];
-            updateTile(tile, num);
-        }
-    }
-}
-
-function slideUp() {
-    for (let c = 0; c < columns; c++) {
-        let row = [board[0][c], board[1][c], board[2][c], board[3][c]];
-        row = slide(row);
-        // board[0][c] = row[0];
-        // board[1][c] = row[1];
-        // board[2][c] = row[2];
-        // board[3][c] = row[3];
-        for (let r = 0; r < rows; r++){
-            board[r][c] = row[r];
-            let tile = document.getElementById(r.toString() + "-" + c.toString());
-            let num = board[r][c];
-            updateTile(tile, num);
-        }
-    }
-}
-
-function slideDown() {
-    for (let c = 0; c < columns; c++) {
-        let row = [board[0][c], board[1][c], board[2][c], board[3][c]];
-        row.reverse();
-        row = slide(row);
-        row.reverse();
-        // board[0][c] = row[0];
-        // board[1][c] = row[1];
-        // board[2][c] = row[2];
-        // board[3][c] = row[3];
-        for (let r = 0; r < rows; r++){
-            board[r][c] = row[r];
-            let tile = document.getElementById(r.toString() + "-" + c.toString());
-            let num = board[r][c];
-            updateTile(tile, num);
-        }
-    }
-}
-
-function setTwo() {
-    if (!hasEmptyTile()) {
-        return;
-    }
-    let found = false;
-    while (!found) {
-        //find random row and column to place a 2 in
-        let r = Math.floor(Math.random() * rows);
-        let c = Math.floor(Math.random() * columns);
-        if (board[r][c] == 0) {
-            board[r][c] = 2;
-            let tile = document.getElementById(r.toString() + "-" + c.toString());
-            tile.innerText = "2";
-            tile.classList.add("x2");
-            found = true;
-        }
-    }
-}
-
-function hasEmptyTile() {
-    let count = 0;
-    for (let r = 0; r < rows; r++) {
-        for (let c = 0; c < columns; c++) {
-            if (board[r][c] == 0) { //at least one zero in the board
-                return true;
-            }
-        }
-    }
-    return false;
-}
+<! DOCTYPE html>  
+<html>  
+<head>  
+<meta name="viewport" content="width=device-width, initial-scale=1">  
+<meta charset="UTF-8">  
+<title> JavaScript editable table </title>  
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">  
+<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">  
+</head>  
+<style>  
+ @import url('https://fonts.googleapis.com/css?family=Montserrat:400,500');  
+body {  
+  font-family: 'Montserrat', sans-serif;  
+  padding: 0;  
+  margin: 0;  
+  text-align: center;  
+}  
+h1 {  
+  position: relative;  
+  padding: 0;  
+  margin: 10;  
+  font-family: "Raleway", sans-serif;  
+  font-weight: 300;  
+  font-size: 40px;  
+  color: #080808;  
+  -webkit-transition: all 0.4s ease 0s;  
+  -o-transition: all 0.4s ease 0s;  
+  transition: all 0.4s ease 0s;   
+}  
+tr:nth-of-type(odd) {   
+    background: #eee;   
+    }  
+    th {   
+    background: #3498db;   
+    color: white;   
+    font-weight: bold;   
+    }  
+  
+@import "compass/css3";  
+.table-editable {  
+  position: relative;  
+  .glyphicon {  
+    font-size: 20px;  
+  }  
+}  
+table {   
+    width: 750px;   
+    border-collapse: collapse;   
+    margin:50px auto;  
+    }  
+    td, th {   
+    padding: 10px;   
+    border: 1px solid #ccc;   
+    text-align: left;   
+    font-size: 18px;  
+    }  
+.table-remove {  
+  color: #700;  
+  cursor: pointer;  
+  &:hover {  
+    color: #f00;  
+  }  
+}  
+.table-up {  
+  color: #007;  
+  cursor: pointer;  
+  &:hover {  
+    color: #00f;  
+  }  
+}  
+.table-down {  
+  color: #007;  
+  cursor: pointer;  
+  &:hover {  
+    color: #00f;  
+  }  
+}  
+.table-add {  
+  color: #070;  
+  cursor: pointer;  
+  position: absolute;  
+  top: 8px;  
+  right: 0;  
+  &:hover {  
+    color: #0b0;  
+  }  
+}  
+</style>  
+<body>  
+<div class="container">  
+  <h1> JavaScript Editable Table </h1>  
+  <div id="table" class="table-editable">  
+    <table class="table">  
+      <tr>  
+        <th> Name</th>  
+        <th> Roll No </th>  
+        <th> Class </th>  
+        <th> Marks </th>  
+      </tr>  
+      <tr>  
+        <td contenteditable="true"> Ram </td>  
+        <td contenteditable="true"> 1 </td>  
+        <td contenteditable="true"> BA </td>  
+    <td contenteditable="true"> 48 </td>  
+      </tr>  
+<tr>  
+        <td contenteditable="true"> Rama </td>  
+        <td contenteditable="true"> 10 </td>  
+       <td contenteditable="true"> BSC </td>  
+  <td contenteditable="true"> 40 </td>  
+      </tr>  
+        <tr>  
+        <td contenteditable="true"> sham </td>  
+        <td contenteditable="true"> 8 </td>  
+       <td contenteditable="true"> BCA </td>  
+      <td contenteditable="true"> 34 </td>  
+      </tr>  
+    <tr>  
+        <td contenteditable="true"> shama </td>  
+        <td contenteditable="true"> 3 </td>  
+    <td contenteditable="true"> BCA </td>  
+    <td contenteditable="true"> 30 </td>  
+      </tr>  
+    </table>  
+  </div>  
+</div>  
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"> </script>  
+<script>  
+var $TABLE = $('#table');  
+var $BTN = $('#export-btn');  
+var $EXPORT = $('#export');  
+$('.table-add').click(function () {  
+  var $clone = $TABLE.find('tr.hide').clone(true).removeClass('hide table-line');  
+  $TABLE.find('table').append($clone);  
+});  
+$('.table-remove').click(function () {  
+  $(this).parents('tr').detach();  
+});  
+$('.table-up').click(function () {  
+  var $row = $(this).parents('tr');  
+  if ($row.index() === 1) return;   
+  $row.prev().before($row.get(0));  
+});  
+$('.table-down').click(function () {  
+  var $row = $(this).parents('tr');  
+  $row.next().after($row.get(0));  
+});  
+jQuery.fn.pop = [].pop;  
+jQuery.fn.shift = [].shift;  
+$BTN.click(function () {  
+  var $rows = $TABLE.find('tr:not(:hidden)');  
+  var headers = [];  
+  var data = [];  
+    $($rows.shift()).find('th:not(:empty)').each(function () {  
+    headers.push($(this).text().toLowerCase());  
+  });  
+  $rows.each(function () {  
+    var $td = $(this).find('td');  
+    var h = {};  
+        headers.forEach(function (header, i) {  
+      h[header] = $td.eq(i).text();     
+    });  
+        data.push(h);  
+  });  
+    });  
+</script>  
+</body>  
+</html> 
